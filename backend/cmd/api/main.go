@@ -62,6 +62,12 @@ func main() {
 
 	}
 
+	if db.Migrator().HasColumn(&models.Kontakt{}, "standort") {
+		if err := db.Migrator().DropColumn(&models.Kontakt{}, "standort"); err != nil {
+			log.Fatalf("database migration failed: %v", err)
+		}
+	}
+
 	log.Println("Database schema migrated")
 
 

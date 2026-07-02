@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { Kontakt, KontaktFormData } from "@/types/kontakt";
-import { emptyKontaktForm, STANDORT_OPTIONS } from "@/types/kontakt";
+import { emptyKontaktForm } from "@/types/kontakt";
 import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ interface KontaktDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   debitorId: number;
+  debitorOptions?: Array<{ id: number; name: string }>;
   kontakt?: Kontakt | null;
   onSave: (form: KontaktFormData) => Promise<void>;
 }
@@ -23,6 +24,7 @@ export function KontaktDialog({
   open,
   onOpenChange,
   debitorId,
+  debitorOptions = [],
   kontakt,
   onSave,
 }: KontaktDialogProps) {
@@ -40,7 +42,6 @@ export function KontaktDialog({
           nachname: kontakt.nachname,
           email: kontakt.email,
           telefon: kontakt.telefon,
-          standort: kontakt.standort,
           debitorId: kontakt.debitorId,
         });
       } else {
@@ -118,24 +119,24 @@ export function KontaktDialog({
               onChange={(e) => updateField("telefon", e.target.value)}
             />
           </div>
-          <div className="col-span-2 space-y-2">
-            <Label htmlFor="kontakt-standort">Standort *</Label>
-            <select
-              id="kontakt-standort"
-              value={form.standort}
-              onChange={(e) =>
-                updateField("standort", e.target.value as KontaktFormData["standort"])
-              }
-              className={selectClassName}
-              required
-            >
-              {STANDORT_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          {debitorOptions.length > 0 && (
+            <div className="col-span-2 space-y-2">
+              <Label htmlFor="kontakt-debitor">Debitor *</Label>
+              <select
+                id="kontakt-debitor"
+                value={String(form.debitorId)}
+                onChange={(e) => updateField("debitorId", Number(e.target.value))}
+                className={selectClassName}
+                required
+              >
+                {debitorOptions.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         {error && (

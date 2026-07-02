@@ -84,6 +84,25 @@ export async function fetchKontakte(debitorId: number): Promise<Kontakt[]> {
   return data.kontakte ?? [];
 }
 
+export async function fetchKontakteMitDebitor(): Promise<Kontakt[]> {
+  const debitoren = await fetchDebitoren();
+  const kontakteProDebitor = await Promise.all(
+    debitoren.map(async (debitor) => ({
+      debitorId: debitor.id,
+      debitorName: debitor.name,
+      kontakte: await fetchKontakte(debitor.id),
+    })),
+  );
+
+  return kontakteProDebitor.flatMap(({ debitorId, debitorName, kontakte }) =>
+    kontakte.map((kontakt) => ({
+      ...kontakt,
+      debitorId,
+      debitorName,
+    })),
+  );
+}
+
 export async function createKontakt(form: KontaktFormData): Promise<Kontakt> {
   return apiFetch<Kontakt>("/api/kontakte", {
     method: "POST",

@@ -107,7 +107,6 @@ export function KontaktePanel({ debitorId }: KontaktePanelProps) {
                 <th className="px-3 py-2 font-medium text-slate-600">Name</th>
                 <th className="px-3 py-2 font-medium text-slate-600">E-Mail</th>
                 <th className="px-3 py-2 font-medium text-slate-600">Telefon</th>
-                <th className="px-3 py-2 font-medium text-slate-600">Standort</th>
                 <th className="px-3 py-2 text-right font-medium text-slate-600">
                   Aktionen
                 </th>
@@ -124,11 +123,6 @@ export function KontaktePanel({ debitorId }: KontaktePanelProps) {
                   </td>
                   <td className="px-3 py-2 text-slate-600">
                     {kontakt.telefon || "—"}
-                  </td>
-                  <td className="px-3 py-2">
-                    <span className="inline-flex rounded bg-slate-100 px-2 py-0.5 font-mono text-xs text-slate-700">
-                      {kontakt.standort}
-                    </span>
                   </td>
                   <td className="px-3 py-2">
                     <div className="flex items-center justify-end gap-1">

@@ -15,7 +15,6 @@ type kontaktFields struct {
 	Nachname  string `json:"nachname" minLength:"1" maxLength:"100"`
 	Email     string `json:"email,omitempty" maxLength:"255"`
 	Telefon   string `json:"telefon,omitempty" maxLength:"50"`
-	Standort  string `json:"standort" enum:"SR,SS,SO,SB"`
 	DebitorID uint   `json:"debitorId" doc:"Zugehöriger Debitor"`
 }
 
@@ -132,7 +131,6 @@ func RegisterKontakte(api huma.API, db *gorm.DB) {
 		existing.Nachname = updated.Nachname
 		existing.Email = updated.Email
 		existing.Telefon = updated.Telefon
-		existing.Standort = updated.Standort
 		existing.DebitorID = updated.DebitorID
 
 		if err := db.WithContext(ctx).Save(&existing).Error; err != nil {
@@ -168,17 +166,11 @@ func fieldsToKontakt(body kontaktFields) (*models.Kontakt, error) {
 		return nil, errors.New("debitorId ist erforderlich")
 	}
 
-	standort := models.KontaktStandort(body.Standort)
-	if !models.IsValidKontaktStandort(standort) {
-		return nil, errors.New("standort muss SR, SS, SO oder SB sein")
-	}
-
 	return &models.Kontakt{
 		Vorname:   body.Vorname,
 		Nachname:  body.Nachname,
 		Email:     body.Email,
 		Telefon:   body.Telefon,
-		Standort:  standort,
 		DebitorID: body.DebitorID,
 	}, nil
 }
