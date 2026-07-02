@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { FileSpreadsheet } from "lucide-react";
+import { ExcelIcon } from "@/components/excel-icon";
 import type { Debitor } from "@/types/debitor";
 import type { Kontakt } from "@/types/kontakt";
 import {
@@ -126,22 +126,21 @@ export function ExportExcelButton(props: ExportExcelButtonProps) {
 
   return (
     <>
-      <div className="flex flex-col items-end gap-1">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => setDialogOpen(true)}
-          disabled={!canExport}
-          title={
-            props.kind === "debitoren"
-              ? "Debitoren als Excel-Datei exportieren"
-              : "Kontakte als Excel-Datei exportieren"
-          }
-        >
-          <FileSpreadsheet className="h-4 w-4" />
-          Excel exportieren
-        </Button>
-      </div>
+      <Button
+        type="button"
+        variant="outline"
+        className="gap-2.5"
+        onClick={() => setDialogOpen(true)}
+        disabled={!canExport}
+        title={
+          props.kind === "debitoren"
+            ? "Debitoren als Excel-Datei exportieren"
+            : "Kontakte als Excel-Datei exportieren"
+        }
+      >
+        <ExcelIcon className="h-5 w-5" />
+        Excel exportieren
+      </Button>
 
       <Dialog
         open={dialogOpen}

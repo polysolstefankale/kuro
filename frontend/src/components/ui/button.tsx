@@ -6,16 +6,17 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-slate-600 text-white hover:bg-slate-700 shadow-sm",
+        default:
+          "border border-transparent bg-slate-600 text-white hover:bg-slate-700 shadow-sm",
         outline:
           "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-400",
         ghost: "text-slate-600 hover:bg-slate-100 hover:text-slate-800",
         destructive: "bg-red-600 text-white hover:bg-red-700",
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 px-3 text-xs",
-        lg: "h-10 px-6",
+        default: "h-9 min-h-9 px-4",
+        sm: "h-8 min-h-8 px-3 text-xs",
+        lg: "h-10 min-h-10 px-6",
       },
     },
     defaultVariants: {
@@ -37,7 +38,7 @@ export function Button({
 }: ButtonProps) {
   return (
     <button
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size }), className)}
       {...props}
     />
   );
