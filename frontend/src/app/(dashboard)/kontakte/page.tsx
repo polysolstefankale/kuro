@@ -22,6 +22,7 @@ import {
 } from "@/lib/api";
 import { KontaktDialog } from "@/components/kontakt-dialog";
 import { DebitorFilterSelect } from "@/components/debitor-filter-select";
+import { ExportExcelButton } from "@/components/export-excel-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -113,6 +114,7 @@ export default function KontaktePage() {
   const [editingKontakt, setEditingKontakt] = useState<Kontakt | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [confirmId, setConfirmId] = useState<number | null>(null);
+  const [markedIds, setMarkedIds] = useState<Set<number>>(() => new Set());
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -214,6 +216,33 @@ export default function KontaktePage() {
 
   const dialogDebitorId = editingKontakt?.debitorId ?? debitorOptions[0]?.id ?? 0;
 
+  const visibleIds = useMemo(
+    () => filteredKontakte.map((kontakt) => kontakt.id),
+    [filteredKontakte],
+  );
+
+  const allVisibleMarked =
+    visibleIds.length > 0 && visibleIds.every((id) => markedIds.has(id));
+  const someVisibleMarked =
+    visibleIds.some((id) => markedIds.has(id)) && !allVisibleMarked;
+
+  function toggleRowMarked(id: number) {
+    const next = new Set(markedIds);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setMarkedIds(next);
+  }
+
+  function toggleAllVisibleMarked() {
+    const next = new Set(markedIds);
+    if (allVisibleMarked) {
+      visibleIds.forEach((id) => next.delete(id));
+    } else {
+      visibleIds.forEach((id) => next.add(id));
+    }
+    setMarkedIds(next);
+  }
+
   return (
     <div className="p-8">
       <div className="mb-8 flex items-center justify-between">
@@ -223,10 +252,19 @@ export default function KontaktePage() {
             Kontakte zentral verwalten — suchen, filtern, bearbeiten und löschen
           </p>
         </div>
-        <Button onClick={openCreate} disabled={debitorOptions.length === 0}>
-          <Plus className="h-4 w-4" />
-          Neu
-        </Button>
+        <div className="flex items-center gap-2">
+          <ExportExcelButton
+            kind="kontakte"
+            allRows={kontakte}
+            filteredRows={filteredKontakte}
+            markedIds={markedIds}
+            debitoren={debitoren}
+          />
+          <Button onClick={openCreate} disabled={debitorOptions.length === 0}>
+            <Plus className="h-4 w-4" />
+            Neu
+          </Button>
+        </div>
       </div>
 
       {!loading && (
@@ -266,6 +304,18 @@ export default function KontaktePage() {
           <table className="w-full text-left text-sm">
             <thead className="border-b border-slate-200 bg-slate-50">
               <tr>
+                <th className="w-10 px-3 py-3">
+                  <input
+                    type="checkbox"
+                    checked={allVisibleMarked}
+                    ref={(el) => {
+                      if (el) el.indeterminate = someVisibleMarked;
+                    }}
+                    onChange={toggleAllVisibleMarked}
+                    aria-label="Alle sichtbaren Kontakte markieren"
+                    className="h-4 w-4 rounded border-slate-300 text-slate-700 focus:ring-slate-300"
+                  />
+                </th>
                 <SortableHeader
                   column="name"
                   label="Name"
@@ -304,6 +354,15 @@ export default function KontaktePage() {
             <tbody className="divide-y divide-slate-100">
               {filteredKontakte.map((kontakt) => (
                 <tr key={kontakt.id} className="hover:bg-slate-50">
+                  <td className="px-3 py-3">
+                    <input
+                      type="checkbox"
+                      checked={markedIds.has(kontakt.id)}
+                      onChange={() => toggleRowMarked(kontakt.id)}
+                      aria-label={`${kontaktDisplayName(kontakt)} markieren`}
+                      className="h-4 w-4 rounded border-slate-300 text-slate-700 focus:ring-slate-300"
+                    />
+                  </td>
                   <td className="px-4 py-3 font-medium text-slate-900">
                     {kontaktDisplayName(kontakt) || "—"}
                   </td>

@@ -12,6 +12,7 @@ import {
 } from "@/lib/api";
 import { DebitorDialog } from "@/components/debitor-dialog";
 import { DebitorenTable } from "@/components/debitoren-table";
+import { ExportExcelButton } from "@/components/export-excel-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -48,6 +49,7 @@ export default function DebitorenPage() {
   const [error, setError] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingDebitor, setEditingDebitor] = useState<Debitor | null>(null);
+  const [markedIds, setMarkedIds] = useState<Set<number>>(() => new Set());
   const handledFocusRef = useRef<number | null>(null);
 
   const focusDebitorId = useMemo(() => {
@@ -148,10 +150,18 @@ export default function DebitorenPage() {
             Kundenstamm verwalten — anlegen, bearbeiten und löschen
           </p>
         </div>
-        <Button onClick={openCreate}>
-          <Plus className="h-4 w-4" />
-          Neu
-        </Button>
+        <div className="flex items-center gap-2">
+          <ExportExcelButton
+            kind="debitoren"
+            allRows={debitoren}
+            filteredRows={filteredDebitoren}
+            markedIds={markedIds}
+          />
+          <Button onClick={openCreate}>
+            <Plus className="h-4 w-4" />
+            Neu
+          </Button>
+        </div>
       </div>
 
       {!loading && (
@@ -193,6 +203,8 @@ export default function DebitorenPage() {
         <DebitorenTable
           debitoren={filteredDebitoren}
           focusDebitorId={focusDebitorId}
+          markedIds={markedIds}
+          onMarkedIdsChange={setMarkedIds}
           emptyMessage={emptyMessage}
           showEmptyHint={!search.trim() && statusFilter === "alle"}
           onEdit={openEdit}

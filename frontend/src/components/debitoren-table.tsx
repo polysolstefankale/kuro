@@ -24,6 +24,8 @@ type SortDirection = "asc" | "desc";
 interface DebitorenTableProps {
   debitoren: Debitor[];
   focusDebitorId?: number | null;
+  markedIds: ReadonlySet<number>;
+  onMarkedIdsChange: (ids: Set<number>) => void;
   emptyMessage?: string;
   showEmptyHint?: boolean;
   onEdit: (debitor: Debitor) => void;
@@ -105,6 +107,8 @@ function SortableHeader({
 export function DebitorenTable({
   debitoren,
   focusDebitorId = null,
+  markedIds,
+  onMarkedIdsChange,
   emptyMessage = "Noch keine Debitoren vorhanden.",
   showEmptyHint = true,
   onEdit,
@@ -160,6 +164,33 @@ export function DebitorenTable({
     return copy;
   }, [debitoren, sortColumn, sortDirection]);
 
+  const visibleIds = useMemo(
+    () => sortedDebitoren.map((debitor) => debitor.id),
+    [sortedDebitoren],
+  );
+
+  const allVisibleMarked =
+    visibleIds.length > 0 && visibleIds.every((id) => markedIds.has(id));
+  const someVisibleMarked =
+    visibleIds.some((id) => markedIds.has(id)) && !allVisibleMarked;
+
+  function toggleRowMarked(id: number) {
+    const next = new Set(markedIds);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    onMarkedIdsChange(next);
+  }
+
+  function toggleAllVisibleMarked() {
+    const next = new Set(markedIds);
+    if (allVisibleMarked) {
+      visibleIds.forEach((id) => next.delete(id));
+    } else {
+      visibleIds.forEach((id) => next.add(id));
+    }
+    onMarkedIdsChange(next);
+  }
+
   async function handleDelete(id: number) {
     setDeletingId(id);
     try {
@@ -188,6 +219,18 @@ export function DebitorenTable({
       <table className="w-full text-left text-sm">
         <thead className="border-b border-slate-200 bg-slate-50">
           <tr>
+            <th className="w-10 px-3 py-3">
+              <input
+                type="checkbox"
+                checked={allVisibleMarked}
+                ref={(el) => {
+                  if (el) el.indeterminate = someVisibleMarked;
+                }}
+                onChange={toggleAllVisibleMarked}
+                aria-label="Alle sichtbaren Debitoren markieren"
+                className="h-4 w-4 rounded border-slate-300 text-slate-700 focus:ring-slate-300"
+              />
+            </th>
             <SortableHeader
               column="debitorNummer"
               label="Nummer"
@@ -255,6 +298,15 @@ export function DebitorenTable({
                     "bg-blue-50 ring-2 ring-inset ring-blue-400",
                 )}
               >
+                <td className="px-3 py-3">
+                  <input
+                    type="checkbox"
+                    checked={markedIds.has(debitor.id)}
+                    onChange={() => toggleRowMarked(debitor.id)}
+                    aria-label={`${debitor.name} markieren`}
+                    className="h-4 w-4 rounded border-slate-300 text-slate-700 focus:ring-slate-300"
+                  />
+                </td>
                 <td className="px-4 py-3 font-mono text-slate-700">
                   {debitor.debitorNummer}
                 </td>
@@ -341,7 +393,7 @@ export function DebitorenTable({
               </tr>
               {expandedDebitorId === debitor.id && (
                 <tr>
-                  <td colSpan={7} className="bg-slate-50 px-4 py-4">
+                  <td colSpan={8} className="bg-slate-50 px-4 py-4">
                     <KontaktePanel debitorId={debitor.id} />
                   </td>
                 </tr>
